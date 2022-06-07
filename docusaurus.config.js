@@ -65,7 +65,7 @@ const config = {
             label: 'Azure Container Apps - Hands on Lab',
           },
           {
-            href: 'https://github.com/markharrison/',
+            href: 'https://github.com/markharrison/lab-azure-container-apps',
             label: 'GitHub',
             position: 'right'
           },

@@ -28,7 +28,7 @@ When we are confident that the new business logic is working satisfactory - we s
 az containerapp update -g $RG -o table \
   --image ghcr.io/markharrison/coloursapi:green \
   --name coloursapi \
-  --min-replicas 1   --max-replicas 3 \
+  --min-replicas 0   --max-replicas 3 \
   --revision-suffix greenv2  
 
 az containerapp ingress traffic set -g $RG -o table \
