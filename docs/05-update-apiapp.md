@@ -80,3 +80,10 @@ az containerapp revision deactivate  -g $RG -o table \
 In this section we deployed an update V2 of our business logic.
 
 Intially we allowed a small amount of traffic to use the new version whilst the majority used the old version.  Once satisified, we cutover fully to use the updated version.
+
+To tidy up - delete the resource group
+
+```
+az group delete -n $RG --yes
+```
+

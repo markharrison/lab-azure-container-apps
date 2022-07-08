@@ -22,6 +22,65 @@ The advantages this offers includes:
 
 ## Lab Script
 
+### Redeploy Application 
+
+To provide Dapr tracing using Application Insights, we need to specify the Application Insights instrumentation key to the Container Apps Environment.  
+
+Currently, AZ CLI cannot update an existing Container Apps Environment so we will need to redeploy our application from scratch but this time specifying the Application Insights instrumentation key.
+
+- Set up some variables for our configuration
+- Create a Resource Group - this will be a boundary for all the resources we create.    At the end we can tidy up by deleting the Resource Group.
+
+```
+RG="ContainerAppsDapr-rg"
+LOCATION="northeurope"
+CAENV="ContainerAppsEnvDapr"
+APPINS="colours-appins-dapr"
+az group create -g $RG -l $LOCATION  -o table
+```
+
+- Create an Application Insights instance - get the instrumentation key and store in variable
+
+```
+IKEY=$(az monitor app-insights component create -g $RG \
+  --app $APPINS \
+  --location $LOCATION  \
+  --query "instrumentationKey" )
+```
+
+- Create the Container Apps Environment - specifying the instrumentation key for Dapr to use
+
+```
+az containerapp env create -g $RG -l $LOCATION -o table \
+  --dapr-instrumentation-key $IKEY \
+  --name $CAENV 
+``` 
+
+- Redeploy our containers to the new environment
+
+```
+az containerapp create -g $RG -o table \
+  --image ghcr.io/markharrison/coloursweb:latest \
+  --name coloursweb \
+  --environment $CAENV \
+  --ingress external --target-port 80 \
+  --min-replicas 0   --max-replicas 3 \
+  --revision-suffix webv1 
+
+az containerapp create -g $RG -o table \
+  --image ghcr.io/markharrison/coloursapi:green \
+  --name coloursapi \
+  --environment $CAENV \
+  --ingress internal --target-port 80 \
+  --min-replicas 0   --max-replicas 3 \
+  --revision-suffix greenv2 \
+  --revisions-mode multiple  
+```
+
+![](images/ScrnCreateCAEnvDapr.png)
+
+We are now in a similar position to the end of the previous section - but this time we have an Application Insights wired up for Dapr.
+
 ### Enable DAPR
 
 - Enable Dapr sidecar on the WebApp container.  The app-id is what Dapr uses for service discovery.  The port number is what our WebApp is listening to.
@@ -69,6 +128,32 @@ The Web App configuration needs to be configured to an URL that forces it to use
 
 ![](images/ScrnDaprService.png)
 
+### Application Insights  
+
+- Explore the tranactions recorded by Application Insights 
+- Start with Application Map - each node on the map represents an application component.  Application Map helps you spot performance bottlenecks or failure hotspots across all components of your distributed application. 
+
+![](images/ScrnDaprAppIns1.png)
+
+- Next look at Transactions.   Dependency transactions are requests from ColoursWeb .   Requests transactions are requests received by ColoursAPI . 
+
+![](images/ScrnDaprAppIns2.png)
+
+- Select a transaction and drill down.
+
+![](images/ScrnDaprAppIns3.png)
+
+
+
 ## Summary 
 
-In this section we enabled Dapr.  The client container called the API container using the Dapr service invocation functionality.
+In this section we enabled Dapr.  The client container called the API container using the Dapr service invocation functionality.  
+
+We then looks at the tracing captured by Application Insights - this is used to ensure there was no performance anomalies and can help diagnose any issues encountered.
+
+To tidy up - delete the resource group
+
+```
+az group delete -n $RG --yes
+```
+
