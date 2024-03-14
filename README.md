@@ -1,6 +1,6 @@
 # Azure Container Apps - Hands-on Lab Script
 
-Mark Harrison : 7 June 2022  
+Mark Harrison : 7 June 2022   (last checked for 14 March 2024)
 
 ## Introduction
 
