@@ -9,7 +9,7 @@ sidebar_label: 'Introduction'
 
 Hands-on Lab Script
 
-7 June 2022
+7 June 2022     (last checked for 14 March 2024)
 
 ![](images/01-introduction.png)
 
